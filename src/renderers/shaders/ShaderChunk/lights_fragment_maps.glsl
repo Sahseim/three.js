@@ -2,15 +2,15 @@
 
 	#ifdef USE_LIGHTMAP
 
-		vec3 lightMapIrradiance = texture2D( lightMap, vUv2 ).xyz * lightMapIntensity;
+		vec3 lightMapIrradiance = texture2D( lightMap, vUv2 ).xyz * lightMapIntensity + (1.0-lightMapIntensity);
 
 		#ifndef PHYSICALLY_CORRECT_LIGHTS
 
-			lightMapIrradiance *= PI; // factor of PI should not be present; included here to prevent breakage
+			//lightMapIrradiance *= PI; // factor of PI should not be present; included here to prevent breakage
 
 		#endif
 
-		irradiance += lightMapIrradiance;
+		irradiance *= lightMapIrradiance;
 
 	#endif
 
