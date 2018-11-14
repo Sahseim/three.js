@@ -56,6 +56,7 @@ var ShaderLib = {
 			UniformsLib.specularmap,
 			UniformsLib.envmap,
 			UniformsLib.aomap,
+			UniformsLib.mulmap,
 			UniformsLib.lightmap,
 			UniformsLib.emissivemap,
 			UniformsLib.bumpmap,

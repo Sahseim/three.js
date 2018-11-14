@@ -13,6 +13,7 @@ uniform float opacity;
 #include <uv_pars_fragment>
 #include <uv2_pars_fragment>
 #include <map_pars_fragment>
+#include <mul_pars_fragment>
 #include <alphamap_pars_fragment>
 #include <aomap_pars_fragment>
 #include <lightmap_pars_fragment>
@@ -40,6 +41,7 @@ void main() {
 
 	#include <logdepthbuf_fragment>
 	#include <map_fragment>
+	#include <mul_fragment>
 	#include <color_fragment>
 	#include <alphamap_fragment>
 	#include <alphatest_fragment>

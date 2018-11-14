@@ -50,6 +50,13 @@ var UniformsLib = {
 
 	},
 
+	mulmap: {
+
+		mulMap: { value: null },
+		mul: { value: 1 }
+
+	},
+
 	emissivemap: {
 
 		emissiveMap: { value: null }

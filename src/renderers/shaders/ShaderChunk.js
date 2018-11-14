@@ -50,7 +50,9 @@ import logdepthbuf_pars_fragment from './ShaderChunk/logdepthbuf_pars_fragment.g
 import logdepthbuf_pars_vertex from './ShaderChunk/logdepthbuf_pars_vertex.glsl';
 import logdepthbuf_vertex from './ShaderChunk/logdepthbuf_vertex.glsl';
 import map_fragment from './ShaderChunk/map_fragment.glsl';
+import mul_fragment from './ShaderChunk/mul_fragment.glsl';
 import map_pars_fragment from './ShaderChunk/map_pars_fragment.glsl';
+import mul_pars_fragment from './ShaderChunk/mul_pars_fragment.glsl';
 import map_particle_fragment from './ShaderChunk/map_particle_fragment.glsl';
 import map_particle_pars_fragment from './ShaderChunk/map_particle_pars_fragment.glsl';
 import metalnessmap_fragment from './ShaderChunk/metalnessmap_fragment.glsl';
@@ -173,6 +175,8 @@ export var ShaderChunk = {
 	logdepthbuf_vertex: logdepthbuf_vertex,
 	map_fragment: map_fragment,
 	map_pars_fragment: map_pars_fragment,
+	mul_fragment: mul_fragment,
+	mul_pars_fragment: mul_pars_fragment,
 	map_particle_fragment: map_particle_fragment,
 	map_particle_pars_fragment: map_particle_pars_fragment,
 	metalnessmap_fragment: metalnessmap_fragment,
