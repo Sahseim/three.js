@@ -1960,6 +1960,12 @@ function WebGLRenderer( parameters ) {
 
 		}
 
+		if ( material.mulNormalMap ) {
+
+			uniforms.mulNormalMap.value = material.mulNormalMap;
+
+		}
+
 		if ( material.aoMap ) {
 
 			uniforms.aoMap.value = material.aoMap;

@@ -27,6 +27,7 @@ uniform float opacity;
 #include <shadowmap_pars_fragment>
 #include <bumpmap_pars_fragment>
 #include <normalmap_pars_fragment>
+#include <mul_normal_pars_fragment>
 #include <specularmap_pars_fragment>
 #include <logdepthbuf_pars_fragment>
 #include <clipping_planes_pars_fragment>
@@ -48,6 +49,7 @@ void main() {
 	#include <specularmap_fragment>
 	#include <normal_fragment_begin>
 	#include <normal_fragment_maps>
+	#include <mul_normal_fragment>
 	#include <emissivemap_fragment>
 
 	// accumulation

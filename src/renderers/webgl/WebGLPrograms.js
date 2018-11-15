@@ -30,6 +30,7 @@ function WebGLPrograms( renderer, extensions, capabilities ) {
 	var parameterNames = [
 		"precision", "supportsVertexTextures", "map", "mapEncoding", "matcapEncoding", "envMap", "envMapMode", "envMapEncoding",
 		"mulMap", "mul",
+		"mulNormalMap",
 		"lightMap", "aoMap", "emissiveMap", "emissiveMapEncoding", "bumpMap", "normalMap", "objectSpaceNormalMap", "displacementMap", "specularMap",
 		"roughnessMap", "metalnessMap", "gradientMap",
 		"alphaMap", "combine", "vertexColors", "fog", "useFog", "fogExp",
@@ -149,6 +150,7 @@ function WebGLPrograms( renderer, extensions, capabilities ) {
 			envMapCubeUV: ( !! material.envMap ) && ( ( material.envMap.mapping === CubeUVReflectionMapping ) || ( material.envMap.mapping === CubeUVRefractionMapping ) ),
 			lightMap: !! material.lightMap,
 			mulMap: !! material.mulMap,
+			mulNormalMap: !! material.mulNormalMap,
 			mul: !! material.mul,
 			aoMap: !! material.aoMap,
 			emissiveMap: !! material.emissiveMap,

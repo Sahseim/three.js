@@ -20,12 +20,12 @@
 
 	#else // tangent-space normal map
 
-		normal = perturbNormal2Arb( -vViewPosition, normal );
+		normal = perturbNormal2Arb( -vViewPosition, normal , normalMap, vUv);
 
 	#endif
 
 #elif defined( USE_BUMPMAP )
 
-	normal = perturbNormalArb( -vViewPosition, normal, dHdxy_fwd() );
+	normal = perturbNormalArb( -vViewPosition, normal, dHdxy_fwd(), normalMap, vUv );
 
 #endif

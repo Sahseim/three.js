@@ -72,6 +72,8 @@ function MeshPhongMaterial( parameters ) {
 	this.mulMap = null;
 	this.mul= 1.0;
 
+	this.mulNormalMap = null;
+
 	this.aoMap = null;
 	this.aoMapIntensity = 1.0;
 
@@ -132,6 +134,8 @@ MeshPhongMaterial.prototype.copy = function ( source ) {
 
 	this.mulMap = source.mulMap;
 	this.mul = source.mul;
+
+	this.mulNormalMap = source.mulNormalMap;
 
 	this.aoMap = source.aoMap;
 	this.aoMapIntensity = source.aoMapIntensity;
