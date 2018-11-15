@@ -6084,11 +6084,15 @@ var logdepthbuf_vertex = "#ifdef USE_LOGDEPTHBUF\r\n\r\n\t#ifdef USE_LOGDEPTHBUF
 
 var map_fragment = "#ifdef USE_MAP\r\n\r\n\tvec4 texelColor = texture2D( map, vUv );\r\n\r\n\ttexelColor = mapTexelToLinear( texelColor );\r\n\tdiffuseColor *= texelColor;\r\n\r\n#endif\r\n";
 
-var mul_fragment = "#ifdef USE_MUL\r\n\r\n\tvec4 texelColorMul = texture2D( mulMap, vUv );\r\n\r\n\ttexelColorMul = mapTexelToLinear( texelColorMul );\r\n\tdiffuseColor *= texelColorMul;\r\n\r\n#endif\r\n";
+var mul_fragment = "#ifdef USE_MUL\r\n\r\n\tvec4 texelColorMul = texture2D( mulMap, vUv / mul );\r\n\r\n\ttexelColorMul = mapTexelToLinear( texelColorMul );\r\n\tdiffuseColor *= texelColorMul;\r\n\r\n#endif\r\n";
 
-var map_pars_fragment = "#ifdef USE_MAP\r\n\r\n\tuniform sampler2D map;\r\n\r\n#endif\r\n";
+var mul_normal_fragment = "#ifdef USE_MUL_NORMAL\r\n\r\n\t#ifdef OBJECTSPACE_NORMALMAP\r\n\r\n\t\tvec3 normal2 = texture2D( mulNormalMap, vUv / mul ).xyz * 2.0 - 1.0; // overrides both flatShading and attribute normals\r\n\r\n\t\t#ifdef FLIP_SIDED\r\n\r\n\t\t\tnormal2 = - normal2;\r\n\r\n\t\t#endif\r\n\r\n\t\t#ifdef DOUBLE_SIDED\r\n\r\n\t\t\tnormal2 = normal2 * ( float( gl_FrontFacing ) * 2.0 - 1.0 );\r\n\r\n\t\t#endif\r\n\r\n\t\tnormal2 = normalize( normalMatrix * normal2 );\r\n\r\n\t#else // tangent-space normal map\r\n\r\n\t\tvec3 normal2 = perturbNormal2Arb( -vViewPosition, normal, mulNormalMap, vUv / mul );\r\n\r\n\t#endif\r\n\t\r\n\tnormal=(normal+normal2) / 2.0;\r\n\r\n#endif\r\n";
+
+var map_pars_fragment = "#if defined( USE_MAP )\r\n\t\r\n\tuniform sampler2D map;\r\n\r\n#endif\r\n";
 
 var mul_pars_fragment = "#ifdef USE_MUL\r\n\r\n\tuniform sampler2D mulMap;\r\n\tuniform float mul;\r\n\r\n#endif\r\n";
+
+var mul_normal_pars_fragment = "#ifdef USE_MUL\r\n\r\n\tuniform sampler2D mulNormalMap;\r\n\r\n#endif\r\n";
 
 var map_particle_fragment = "#ifdef USE_MAP\r\n\r\n\tvec2 uv = ( uvTransform * vec3( gl_PointCoord.x, 1.0 - gl_PointCoord.y, 1 ) ).xy;\r\n\tvec4 mapTexel = texture2D( map, uv );\r\n\tdiffuseColor *= mapTexelToLinear( mapTexel );\r\n\r\n#endif\r\n";
 
@@ -6106,9 +6110,9 @@ var morphtarget_vertex = "#ifdef USE_MORPHTARGETS\r\n\r\n\ttransformed += ( morp
 
 var normal_fragment_begin = "#ifdef FLAT_SHADED\r\n\r\n\t// Workaround for Adreno/Nexus5 not able able to do dFdx( vViewPosition ) ...\r\n\r\n\tvec3 fdx = vec3( dFdx( vViewPosition.x ), dFdx( vViewPosition.y ), dFdx( vViewPosition.z ) );\r\n\tvec3 fdy = vec3( dFdy( vViewPosition.x ), dFdy( vViewPosition.y ), dFdy( vViewPosition.z ) );\r\n\tvec3 normal = normalize( cross( fdx, fdy ) );\r\n\r\n#else\r\n\r\n\tvec3 normal = normalize( vNormal );\r\n\r\n\t#ifdef DOUBLE_SIDED\r\n\r\n\t\tnormal = normal * ( float( gl_FrontFacing ) * 2.0 - 1.0 );\r\n\r\n\t#endif\r\n\r\n#endif\r\n";
 
-var normal_fragment_maps = "#ifdef USE_NORMALMAP\r\n\r\n\t#ifdef OBJECTSPACE_NORMALMAP\r\n\r\n\t\tnormal = texture2D( normalMap, vUv ).xyz * 2.0 - 1.0; // overrides both flatShading and attribute normals\r\n\r\n\t\t#ifdef FLIP_SIDED\r\n\r\n\t\t\tnormal = - normal;\r\n\r\n\t\t#endif\r\n\r\n\t\t#ifdef DOUBLE_SIDED\r\n\r\n\t\t\tnormal = normal * ( float( gl_FrontFacing ) * 2.0 - 1.0 );\r\n\r\n\t\t#endif\r\n\r\n\t\tnormal = normalize( normalMatrix * normal );\r\n\r\n\t#else // tangent-space normal map\r\n\r\n\t\tnormal = perturbNormal2Arb( -vViewPosition, normal );\r\n\r\n\t#endif\r\n\r\n#elif defined( USE_BUMPMAP )\r\n\r\n\tnormal = perturbNormalArb( -vViewPosition, normal, dHdxy_fwd() );\r\n\r\n#endif\r\n";
+var normal_fragment_maps = "#ifdef USE_NORMALMAP\r\n\r\n\t#ifdef OBJECTSPACE_NORMALMAP\r\n\r\n\t\tnormal = texture2D( normalMap, vUv ).xyz * 2.0 - 1.0; // overrides both flatShading and attribute normals\r\n\r\n\t\t#ifdef FLIP_SIDED\r\n\r\n\t\t\tnormal = - normal;\r\n\r\n\t\t#endif\r\n\r\n\t\t#ifdef DOUBLE_SIDED\r\n\r\n\t\t\tnormal = normal * ( float( gl_FrontFacing ) * 2.0 - 1.0 );\r\n\r\n\t\t#endif\r\n\r\n\t\tnormal = normalize( normalMatrix * normal );\r\n\r\n\t#else // tangent-space normal map\r\n\r\n\t\tnormal = perturbNormal2Arb( -vViewPosition, normal , normalMap, vUv);\r\n\r\n\t#endif\r\n\r\n#elif defined( USE_BUMPMAP )\r\n\r\n\tnormal = perturbNormalArb( -vViewPosition, normal, dHdxy_fwd(), normalMap, vUv );\r\n\r\n#endif\r\n";
 
-var normalmap_pars_fragment = "#ifdef USE_NORMALMAP\r\n\r\n\tuniform sampler2D normalMap;\r\n\tuniform vec2 normalScale;\r\n\r\n\t#ifdef OBJECTSPACE_NORMALMAP\r\n\r\n\t\tuniform mat3 normalMatrix;\r\n\r\n\t#else\r\n\r\n\t\t// Per-Pixel Tangent Space Normal Mapping\r\n\t\t// http://hacksoflife.blogspot.ch/2009/11/per-pixel-tangent-space-normal-mapping.html\r\n\r\n\t\tvec3 perturbNormal2Arb( vec3 eye_pos, vec3 surf_norm ) {\r\n\r\n\t\t\t// Workaround for Adreno 3XX dFd*( vec3 ) bug. See #9988\r\n\r\n\t\t\tvec3 q0 = vec3( dFdx( eye_pos.x ), dFdx( eye_pos.y ), dFdx( eye_pos.z ) );\r\n\t\t\tvec3 q1 = vec3( dFdy( eye_pos.x ), dFdy( eye_pos.y ), dFdy( eye_pos.z ) );\r\n\t\t\tvec2 st0 = dFdx( vUv.st );\r\n\t\t\tvec2 st1 = dFdy( vUv.st );\r\n\r\n\t\t\tfloat scale = sign( st1.t * st0.s - st0.t * st1.s ); // we do not care about the magnitude\r\n\r\n\t\t\tvec3 S = normalize( ( q0 * st1.t - q1 * st0.t ) * scale );\r\n\t\t\tvec3 T = normalize( ( - q0 * st1.s + q1 * st0.s ) * scale );\r\n\t\t\tvec3 N = normalize( surf_norm );\r\n\t\t\tmat3 tsn = mat3( S, T, N );\r\n\r\n\t\t\tvec3 mapN = texture2D( normalMap, vUv ).xyz * 2.0 - 1.0;\r\n\r\n\t\t\tmapN.xy *= normalScale;\r\n\t\t\tmapN.xy *= ( float( gl_FrontFacing ) * 2.0 - 1.0 );\r\n\r\n\t\t\treturn normalize( tsn * mapN );\r\n\r\n\t\t}\r\n\r\n\t#endif\r\n\r\n#endif\r\n";
+var normalmap_pars_fragment = "#if defined( USE_NORMALMAP ) || defined( USE_MUL_NORMAL )\r\n\r\n\tuniform sampler2D normalMap;\r\n\tuniform vec2 normalScale;\r\n\r\n\t#ifdef OBJECTSPACE_NORMALMAP\r\n\r\n\t\tuniform mat3 normalMatrix;\r\n\r\n\t#else\r\n\r\n\t\t// Per-Pixel Tangent Space Normal Mapping\r\n\t\t// http://hacksoflife.blogspot.ch/2009/11/per-pixel-tangent-space-normal-mapping.html\r\n\r\n\t\tvec3 perturbNormal2Arb( vec3 eye_pos, vec3 surf_norm, sampler2D myNormalMap, vec2 myUv ) {\r\n\r\n\t\t\t// Workaround for Adreno 3XX dFd*( vec3 ) bug. See #9988\r\n\r\n\t\t\tvec3 q0 = vec3( dFdx( eye_pos.x ), dFdx( eye_pos.y ), dFdx( eye_pos.z ) );\r\n\t\t\tvec3 q1 = vec3( dFdy( eye_pos.x ), dFdy( eye_pos.y ), dFdy( eye_pos.z ) );\r\n\t\t\tvec2 st0 = dFdx( myUv.st );\r\n\t\t\tvec2 st1 = dFdy( myUv.st );\r\n\r\n\t\t\tfloat scale = sign( st1.t * st0.s - st0.t * st1.s ); // we do not care about the magnitude\r\n\r\n\t\t\tvec3 S = normalize( ( q0 * st1.t - q1 * st0.t ) * scale );\r\n\t\t\tvec3 T = normalize( ( - q0 * st1.s + q1 * st0.s ) * scale );\r\n\t\t\tvec3 N = normalize( surf_norm );\r\n\t\t\tmat3 tsn = mat3( S, T, N );\r\n\r\n\t\t\tvec3 mapN = texture2D( myNormalMap, myUv ).xyz * 2.0 - 1.0;\r\n\r\n\t\t\tmapN.xy *= normalScale;\r\n\t\t\tmapN.xy *= ( float( gl_FrontFacing ) * 2.0 - 1.0 );\r\n\r\n\t\t\treturn normalize( tsn * mapN );\r\n\r\n\t\t}\r\n\r\n\t#endif\r\n\r\n#endif\r\n";
 
 var packing = "vec3 packNormalToRGB( const in vec3 normal ) {\r\n\treturn normalize( normal ) * 0.5 + 0.5;\r\n}\r\n\r\nvec3 unpackRGBToNormal( const in vec3 rgb ) {\r\n\treturn 2.0 * rgb.xyz - 1.0;\r\n}\r\n\r\nconst float PackUpscale = 256. / 255.; // fraction -> 0..1 (including 1)\r\nconst float UnpackDownscale = 255. / 256.; // 0..1 -> fraction (excluding 1)\r\n\r\nconst vec3 PackFactors = vec3( 256. * 256. * 256., 256. * 256.,  256. );\r\nconst vec4 UnpackFactors = UnpackDownscale / vec4( PackFactors, 1. );\r\n\r\nconst float ShiftRight8 = 1. / 256.;\r\n\r\nvec4 packDepthToRGBA( const in float v ) {\r\n\tvec4 r = vec4( fract( v * PackFactors ), v );\r\n\tr.yzw -= r.xyz * ShiftRight8; // tidy overflow\r\n\treturn r * PackUpscale;\r\n}\r\n\r\nfloat unpackRGBAToDepth( const in vec4 v ) {\r\n\treturn dot( v, UnpackFactors );\r\n}\r\n\r\n// NOTE: viewZ/eyeZ is < 0 when in front of the camera per OpenGL conventions\r\n\r\nfloat viewZToOrthographicDepth( const in float viewZ, const in float near, const in float far ) {\r\n\treturn ( viewZ + near ) / ( near - far );\r\n}\r\nfloat orthographicDepthToViewZ( const in float linearClipZ, const in float near, const in float far ) {\r\n\treturn linearClipZ * ( near - far ) - near;\r\n}\r\n\r\nfloat viewZToPerspectiveDepth( const in float viewZ, const in float near, const in float far ) {\r\n\treturn (( near + viewZ ) * far ) / (( far - near ) * viewZ );\r\n}\r\nfloat perspectiveDepthToViewZ( const in float invClipZ, const in float near, const in float far ) {\r\n\treturn ( near * far ) / ( ( far - near ) * invClipZ - far );\r\n}\r\n";
 
@@ -6152,7 +6156,7 @@ var uv_pars_fragment = "#if defined( USE_MAP ) || defined( USE_MUL ) || defined(
 
 var uv_pars_vertex = "#if defined( USE_MAP ) || defined( USE_MUL ) || defined( USE_BUMPMAP ) || defined( USE_NORMALMAP ) || defined( USE_SPECULARMAP ) || defined( USE_ALPHAMAP ) || defined( USE_EMISSIVEMAP ) || defined( USE_ROUGHNESSMAP ) || defined( USE_METALNESSMAP )\r\n\r\n\tvarying vec2 vUv;\r\n\tuniform mat3 uvTransform;\r\n\r\n#endif\r\n";
 
-var uv_vertex = "#if defined( USE_MAP ) || defined( USE_BUMPMAP ) || defined( USE_NORMALMAP ) || defined( USE_SPECULARMAP ) || defined( USE_ALPHAMAP ) || defined( USE_EMISSIVEMAP ) || defined( USE_ROUGHNESSMAP ) || defined( USE_METALNESSMAP )\r\n\r\n\tvUv = ( uvTransform * vec3( uv, 1 ) ).xy;\r\n\r\n#endif";
+var uv_vertex = "#if defined( USE_MAP ) || defined( USE_MUL ) || defined( USE_BUMPMAP ) || defined( USE_NORMALMAP ) || defined( USE_SPECULARMAP ) || defined( USE_ALPHAMAP ) || defined( USE_EMISSIVEMAP ) || defined( USE_ROUGHNESSMAP ) || defined( USE_METALNESSMAP )\r\n\r\n\tvUv = ( uvTransform * vec3( uv, 1 ) ).xy;\r\n\r\n#endif";
 
 var uv2_pars_fragment = "#if defined( USE_LIGHTMAP ) || defined( USE_AOMAP )\r\n\r\n\tvarying vec2 vUv2;\r\n\r\n#endif";
 
@@ -6198,7 +6202,7 @@ var meshmatcap_frag = "#define MATCAP\r\n\r\nuniform vec3 diffuse;\r\nuniform fl
 
 var meshmatcap_vert = "#define MATCAP\r\n\r\nvarying vec3 vViewPosition;\r\n\r\n#ifndef FLAT_SHADED\r\n\r\n\tvarying vec3 vNormal;\r\n\r\n#endif\r\n\r\n#include <common>\r\n#include <uv_pars_vertex>\r\n#include <displacementmap_pars_vertex>\r\n#include <fog_pars_vertex>\r\n#include <morphtarget_pars_vertex>\r\n#include <skinning_pars_vertex>\r\n\r\n#include <logdepthbuf_pars_vertex>\r\n#include <clipping_planes_pars_vertex>\r\n\r\nvoid main() {\r\n\r\n\t#include <uv_vertex>\r\n\r\n\t#include <beginnormal_vertex>\r\n\t#include <morphnormal_vertex>\r\n\t#include <skinbase_vertex>\r\n\t#include <skinnormal_vertex>\r\n\t#include <defaultnormal_vertex>\r\n\r\n\t#ifndef FLAT_SHADED // Normal computed with derivatives when FLAT_SHADED\r\n\r\n\t\tvNormal = normalize( transformedNormal );\r\n\r\n\t#endif\r\n\r\n\t#include <begin_vertex>\r\n\t#include <morphtarget_vertex>\r\n\t#include <skinning_vertex>\r\n\t#include <displacementmap_vertex>\r\n\t#include <project_vertex>\r\n\r\n\t#include <logdepthbuf_vertex>\r\n\t#include <clipping_planes_vertex>\r\n\t#include <fog_vertex>\r\n\r\n\tvViewPosition = - mvPosition.xyz;\r\n\r\n}\r\n";
 
-var meshphong_frag = "#define PHONG\r\n\r\nuniform vec3 diffuse;\r\nuniform vec3 emissive;\r\nuniform vec3 specular;\r\nuniform float shininess;\r\nuniform float opacity;\r\n\r\n#include <common>\r\n#include <packing>\r\n#include <dithering_pars_fragment>\r\n#include <color_pars_fragment>\r\n#include <uv_pars_fragment>\r\n#include <uv2_pars_fragment>\r\n#include <map_pars_fragment>\r\n#include <mul_pars_fragment>\r\n#include <alphamap_pars_fragment>\r\n#include <aomap_pars_fragment>\r\n#include <lightmap_pars_fragment>\r\n#include <emissivemap_pars_fragment>\r\n#include <envmap_pars_fragment>\r\n#include <gradientmap_pars_fragment>\r\n#include <fog_pars_fragment>\r\n#include <bsdfs>\r\n#include <lights_pars_begin>\r\n#include <lights_phong_pars_fragment>\r\n#include <shadowmap_pars_fragment>\r\n#include <bumpmap_pars_fragment>\r\n#include <normalmap_pars_fragment>\r\n#include <specularmap_pars_fragment>\r\n#include <logdepthbuf_pars_fragment>\r\n#include <clipping_planes_pars_fragment>\r\n\r\nvoid main() {\r\n\r\n\t#include <clipping_planes_fragment>\r\n\r\n\tvec4 diffuseColor = vec4( diffuse, opacity );\r\n\tReflectedLight reflectedLight = ReflectedLight( vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ) );\r\n\tvec3 totalEmissiveRadiance = emissive;\r\n\r\n\t#include <logdepthbuf_fragment>\r\n\t#include <map_fragment>\r\n\t#include <mul_fragment>\r\n\t#include <color_fragment>\r\n\t#include <alphamap_fragment>\r\n\t#include <alphatest_fragment>\r\n\t#include <specularmap_fragment>\r\n\t#include <normal_fragment_begin>\r\n\t#include <normal_fragment_maps>\r\n\t#include <emissivemap_fragment>\r\n\r\n\t// accumulation\r\n\t#include <lights_phong_fragment>\r\n\t#include <lights_fragment_begin>\r\n\t#include <lights_fragment_maps>\r\n\t#include <lights_fragment_end>\r\n\r\n\t// modulation\r\n\t#include <aomap_fragment>\r\n\r\n\tvec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse + reflectedLight.directSpecular + reflectedLight.indirectSpecular + totalEmissiveRadiance;\r\n\r\n\t#include <envmap_fragment>\r\n\r\n\tgl_FragColor = vec4( outgoingLight, diffuseColor.a );\r\n\r\n\t#include <tonemapping_fragment>\r\n\t#include <encodings_fragment>\r\n\t#include <fog_fragment>\r\n\t#include <premultiplied_alpha_fragment>\r\n\t#include <dithering_fragment>\r\n\r\n}\r\n";
+var meshphong_frag = "#define PHONG\r\n\r\nuniform vec3 diffuse;\r\nuniform vec3 emissive;\r\nuniform vec3 specular;\r\nuniform float shininess;\r\nuniform float opacity;\r\n\r\n#include <common>\r\n#include <packing>\r\n#include <dithering_pars_fragment>\r\n#include <color_pars_fragment>\r\n#include <uv_pars_fragment>\r\n#include <uv2_pars_fragment>\r\n#include <map_pars_fragment>\r\n#include <mul_pars_fragment>\r\n#include <alphamap_pars_fragment>\r\n#include <aomap_pars_fragment>\r\n#include <lightmap_pars_fragment>\r\n#include <emissivemap_pars_fragment>\r\n#include <envmap_pars_fragment>\r\n#include <gradientmap_pars_fragment>\r\n#include <fog_pars_fragment>\r\n#include <bsdfs>\r\n#include <lights_pars_begin>\r\n#include <lights_phong_pars_fragment>\r\n#include <shadowmap_pars_fragment>\r\n#include <bumpmap_pars_fragment>\r\n#include <normalmap_pars_fragment>\r\n#include <mul_normal_pars_fragment>\r\n#include <specularmap_pars_fragment>\r\n#include <logdepthbuf_pars_fragment>\r\n#include <clipping_planes_pars_fragment>\r\n\r\nvoid main() {\r\n\r\n\t#include <clipping_planes_fragment>\r\n\r\n\tvec4 diffuseColor = vec4( diffuse, opacity );\r\n\tReflectedLight reflectedLight = ReflectedLight( vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ) );\r\n\tvec3 totalEmissiveRadiance = emissive;\r\n\r\n\t#include <logdepthbuf_fragment>\r\n\t#include <map_fragment>\r\n\t#include <mul_fragment>\r\n\t#include <color_fragment>\r\n\t#include <alphamap_fragment>\r\n\t#include <alphatest_fragment>\r\n\t#include <specularmap_fragment>\r\n\t#include <normal_fragment_begin>\r\n\t#include <normal_fragment_maps>\r\n\t#include <mul_normal_fragment>\r\n\t#include <emissivemap_fragment>\r\n\r\n\t// accumulation\r\n\t#include <lights_phong_fragment>\r\n\t#include <lights_fragment_begin>\r\n\t#include <lights_fragment_maps>\r\n\t#include <lights_fragment_end>\r\n\r\n\t// modulation\r\n\t#include <aomap_fragment>\r\n\r\n\tvec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse + reflectedLight.directSpecular + reflectedLight.indirectSpecular + totalEmissiveRadiance;\r\n\r\n\t#include <envmap_fragment>\r\n\r\n\tgl_FragColor = vec4( outgoingLight, diffuseColor.a );\r\n\r\n\t#include <tonemapping_fragment>\r\n\t#include <encodings_fragment>\r\n\t#include <fog_fragment>\r\n\t#include <premultiplied_alpha_fragment>\r\n\t#include <dithering_fragment>\r\n\r\n}\r\n";
 
 var meshphong_vert = "#define PHONG\r\n\r\nvarying vec3 vViewPosition;\r\n\r\n#ifndef FLAT_SHADED\r\n\r\n\tvarying vec3 vNormal;\r\n\r\n#endif\r\n\r\n#include <common>\r\n#include <uv_pars_vertex>\r\n#include <uv2_pars_vertex>\r\n#include <displacementmap_pars_vertex>\r\n#include <envmap_pars_vertex>\r\n#include <color_pars_vertex>\r\n#include <fog_pars_vertex>\r\n#include <morphtarget_pars_vertex>\r\n#include <skinning_pars_vertex>\r\n#include <shadowmap_pars_vertex>\r\n#include <logdepthbuf_pars_vertex>\r\n#include <clipping_planes_pars_vertex>\r\n\r\nvoid main() {\r\n\r\n\t#include <uv_vertex>\r\n\t#include <uv2_vertex>\r\n\t#include <color_vertex>\r\n\r\n\t#include <beginnormal_vertex>\r\n\t#include <morphnormal_vertex>\r\n\t#include <skinbase_vertex>\r\n\t#include <skinnormal_vertex>\r\n\t#include <defaultnormal_vertex>\r\n\r\n#ifndef FLAT_SHADED // Normal computed with derivatives when FLAT_SHADED\r\n\r\n\tvNormal = normalize( transformedNormal );\r\n\r\n#endif\r\n\r\n\t#include <begin_vertex>\r\n\t#include <morphtarget_vertex>\r\n\t#include <skinning_vertex>\r\n\t#include <displacementmap_vertex>\r\n\t#include <project_vertex>\r\n\t#include <logdepthbuf_vertex>\r\n\t#include <clipping_planes_vertex>\r\n\r\n\tvViewPosition = - mvPosition.xyz;\r\n\r\n\t#include <worldpos_vertex>\r\n\t#include <envmap_vertex>\r\n\t#include <shadowmap_vertex>\r\n\t#include <fog_vertex>\r\n\r\n}\r\n";
 
@@ -6277,7 +6281,9 @@ var ShaderChunk = {
 	map_fragment: map_fragment,
 	map_pars_fragment: map_pars_fragment,
 	mul_fragment: mul_fragment,
+	mul_normal_fragment: mul_normal_fragment,
 	mul_pars_fragment: mul_pars_fragment,
+	mul_normal_pars_fragment: mul_normal_pars_fragment,
 	map_particle_fragment: map_particle_fragment,
 	map_particle_pars_fragment: map_particle_pars_fragment,
 	metalnessmap_fragment: metalnessmap_fragment,
@@ -7069,6 +7075,12 @@ var UniformsLib = {
 
 	},
 
+	mulnormalmap: {
+
+		mulNormalMap: { value: null }
+
+	},
+
 	emissivemap: {
 
 		emissiveMap: { value: null }
@@ -7269,6 +7281,7 @@ var ShaderLib = {
 			UniformsLib.envmap,
 			UniformsLib.aomap,
 			UniformsLib.mulmap,
+			UniformsLib.mulnormalmap,
 			UniformsLib.lightmap,
 			UniformsLib.emissivemap,
 			UniformsLib.bumpmap,
@@ -16924,6 +16937,8 @@ function WebGLProgram( renderer, extensions, code, material, shader, parameters,
 			( parameters.useFog && parameters.fogExp ) ? '#define FOG_EXP2' : '',
 
 			parameters.map ? '#define USE_MAP' : '',
+			parameters.mulMap ? '#define USE_MUL' : '',
+			parameters.mulNormalMap ? '#define USE_MUL_NORMAL' : '',
 			parameters.envMap ? '#define USE_ENVMAP' : '',
 			parameters.envMap ? '#define ' + envMapModeDefine : '',
 			parameters.lightMap ? '#define USE_LIGHTMAP' : '',
@@ -17029,7 +17044,8 @@ function WebGLProgram( renderer, extensions, code, material, shader, parameters,
 			( parameters.useFog && parameters.fogExp ) ? '#define FOG_EXP2' : '',
 
 			parameters.map ? '#define USE_MAP' : '',
-			parameters.mul ? '#define USE_MUL' : '',
+			parameters.mulMap ? '#define USE_MUL' : '',
+			parameters.mulNormalMap ? '#define USE_MUL_NORMAL' : '',
 			parameters.envMap ? '#define USE_ENVMAP' : '',
 			parameters.envMap ? '#define ' + envMapTypeDefine : '',
 			parameters.envMap ? '#define ' + envMapModeDefine : '',
@@ -17339,6 +17355,7 @@ function WebGLPrograms( renderer, extensions, capabilities ) {
 	var parameterNames = [
 		"precision", "supportsVertexTextures", "map", "mapEncoding", "matcapEncoding", "envMap", "envMapMode", "envMapEncoding",
 		"mulMap", "mul",
+		"mulNormalMap",
 		"lightMap", "aoMap", "emissiveMap", "emissiveMapEncoding", "bumpMap", "normalMap", "objectSpaceNormalMap", "displacementMap", "specularMap",
 		"roughnessMap", "metalnessMap", "gradientMap",
 		"alphaMap", "combine", "vertexColors", "fog", "useFog", "fogExp",
@@ -17458,6 +17475,7 @@ function WebGLPrograms( renderer, extensions, capabilities ) {
 			envMapCubeUV: ( !! material.envMap ) && ( ( material.envMap.mapping === CubeUVReflectionMapping ) || ( material.envMap.mapping === CubeUVRefractionMapping ) ),
 			lightMap: !! material.lightMap,
 			mulMap: !! material.mulMap,
+			mulNormalMap: !! material.mulNormalMap,
 			mul: !! material.mul,
 			aoMap: !! material.aoMap,
 			emissiveMap: !! material.emissiveMap,
@@ -23939,6 +23957,19 @@ function WebGLRenderer( parameters ) {
 
 			uniforms.lightMap.value = material.lightMap;
 			uniforms.lightMapIntensity.value = material.lightMapIntensity;
+
+		}
+
+		if ( material.mulMap ) {
+
+			uniforms.mulMap.value = material.mulMap;
+			uniforms.mul.value = material.mul;
+
+		}
+
+		if ( material.mulNormalMap ) {
+
+			uniforms.mulNormalMap.value = material.mulNormalMap;
 
 		}
 
@@ -31380,6 +31411,11 @@ function MeshPhongMaterial( parameters ) {
 	this.lightMap = null;
 	this.lightMapIntensity = 1.0;
 
+	this.mulMap = null;
+	this.mul= 1.0;
+
+	this.mulNormalMap = null;
+
 	this.aoMap = null;
 	this.aoMapIntensity = 1.0;
 
@@ -31437,6 +31473,11 @@ MeshPhongMaterial.prototype.copy = function ( source ) {
 
 	this.lightMap = source.lightMap;
 	this.lightMapIntensity = source.lightMapIntensity;
+
+	this.mulMap = source.mulMap;
+	this.mul = source.mul;
+
+	this.mulNormalMap = source.mulNormalMap;
 
 	this.aoMap = source.aoMap;
 	this.aoMapIntensity = source.aoMapIntensity;
