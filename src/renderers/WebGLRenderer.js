@@ -1953,6 +1953,13 @@ function WebGLRenderer( parameters ) {
 
 		}
 
+		if ( material.mulMap ) {
+
+			uniforms.mulMap.value = material.mulMap;
+			uniforms.mul.value = material.mul;
+
+		}
+
 		if ( material.aoMap ) {
 
 			uniforms.aoMap.value = material.aoMap;

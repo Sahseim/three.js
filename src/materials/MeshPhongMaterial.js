@@ -69,6 +69,9 @@ function MeshPhongMaterial( parameters ) {
 	this.lightMap = null;
 	this.lightMapIntensity = 1.0;
 
+	this.mulMap = null;
+	this.mul= 1.0;
+
 	this.aoMap = null;
 	this.aoMapIntensity = 1.0;
 
@@ -126,6 +129,9 @@ MeshPhongMaterial.prototype.copy = function ( source ) {
 
 	this.lightMap = source.lightMap;
 	this.lightMapIntensity = source.lightMapIntensity;
+
+	this.mulMap = source.mulMap;
+	this.mul = source.mul;
 
 	this.aoMap = source.aoMap;
 	this.aoMapIntensity = source.aoMapIntensity;
