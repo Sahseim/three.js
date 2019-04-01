@@ -46,8 +46,8 @@ Sidebar.Settings = function ( editor ) {
 	// theme
 
 	var options = {
-		'css/light.css': 'light',
-		'css/dark.css': 'dark'
+		'css/light.css': strings.getKey( 'sidebar/settings/theme/light' ),
+		'css/dark.css': strings.getKey( 'sidebar/settings/theme/dark' )
 	};
 
 	var themeRow = new UI.Row();
@@ -72,7 +72,7 @@ Sidebar.Settings = function ( editor ) {
 	themeRow.add( new UI.Text( strings.getKey( 'sidebar/settings/theme' ) ).setWidth( '90px' ) );
 	themeRow.add( theme );
 
-	container.add( themeRow );
+	container.add( themeRow );	
 
 	container.add( new Sidebar.Settings.Shortcuts( editor ) );
 	container.add( new Sidebar.Settings.Viewport( editor ) );

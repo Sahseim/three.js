@@ -5,7 +5,7 @@
 import { BackSide, DoubleSide, CubeUVRefractionMapping, CubeUVReflectionMapping, GammaEncoding, LinearEncoding, ObjectSpaceNormalMap } from '../../constants.js';
 import { WebGLProgram } from './WebGLProgram.js';
 
-function WebGLPrograms( renderer, extensions, capabilities ) {
+function WebGLPrograms( renderer, extensions, capabilities, textures ) {
 
 	var programs = [];
 
@@ -28,12 +28,13 @@ function WebGLPrograms( renderer, extensions, capabilities ) {
 	};
 
 	var parameterNames = [
-		"precision", "supportsVertexTextures", "map", "mapEncoding", "matcapEncoding", "envMap", "envMapMode", "envMapEncoding",
+		"precision", "supportsVertexTextures", "map", "mapEncoding", "matcap", "matcapEncoding", "envMap", "envMapMode", "envMapEncoding",
 		"mulMap", "mul",
 		"mulNormalMap",
+		"precision", "supportsVertexTextures", "map", "mapEncoding", "matcap", "matcapEncoding", "envMap", "envMapMode", "envMapEncoding",
 		"lightMap", "aoMap", "emissiveMap", "emissiveMapEncoding", "bumpMap", "normalMap", "objectSpaceNormalMap", "displacementMap", "specularMap",
 		"roughnessMap", "metalnessMap", "gradientMap",
-		"alphaMap", "combine", "vertexColors", "fog", "useFog", "fogExp",
+		"alphaMap", "combine", "vertexColors", "vertexTangents", "fog", "useFog", "fogExp",
 		"flatShading", "sizeAttenuation", "logarithmicDepthBuffer", "skinning",
 		"maxBones", "useVertexTexture", "morphTargets", "morphNormals",
 		"maxMorphTargets", "maxMorphNormals", "premultipliedAlpha",
@@ -168,6 +169,7 @@ function WebGLPrograms( renderer, extensions, capabilities ) {
 
 			combine: material.combine,
 
+			vertexTangents: ( material.normalMap && material.vertexTangents ),
 			vertexColors: material.vertexColors,
 
 			fog: !! fog,
@@ -283,7 +285,7 @@ function WebGLPrograms( renderer, extensions, capabilities ) {
 
 		if ( program === undefined ) {
 
-			program = new WebGLProgram( renderer, extensions, code, material, shader, parameters, capabilities );
+			program = new WebGLProgram( renderer, extensions, code, material, shader, parameters, capabilities, textures );
 			programs.push( program );
 
 		}
