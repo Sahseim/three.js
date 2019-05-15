@@ -57,6 +57,13 @@ var UniformsLib = {
 
 	},
 
+	textureswitchmap: {
+
+		textureSwitchMap: { value: null },
+		textureSwitchScale: { value: 1 }
+
+	},
+
 	mulnormalmap: {
 
 		mulNormalMap: { value: null }
