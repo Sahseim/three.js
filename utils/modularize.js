@@ -8,8 +8,12 @@ var srcFolder = __dirname + '/../examples/js/';
 var dstFolder = __dirname + '/../examples/jsm/';
 
 var files = [
+	{ path: 'controls/DragControls.js', ignoreList: [] },
+	{ path: 'controls/DeviceOrientationControls.js', ignoreList: [] },
+	{ path: 'controls/EditorControls.js', ignoreList: [] },
 	{ path: 'controls/OrbitControls.js', ignoreList: [] },
 	{ path: 'controls/MapControls.js', ignoreList: [] },
+	{ path: 'controls/PointerLockControls.js', ignoreList: [] },
 	{ path: 'controls/TrackballControls.js', ignoreList: [] },
 	// { path: 'controls/TransformControls.js', ignoreList: [] },
 
@@ -23,6 +27,7 @@ var files = [
 	{ path: 'loaders/GLTFLoader.js', ignoreList: [ 'NoSide', 'Matrix2', 'DDSLoader' ] },
 	{ path: 'loaders/OBJLoader.js', ignoreList: [] },
 	{ path: 'loaders/MTLLoader.js', ignoreList: [] },
+	{ path: 'loaders/STLLoader.js', ignoreList: [] },
 
 	{ path: 'pmrem/PMREMCubeUVPacker.js', ignoreList: [] },
 	{ path: 'pmrem/PMREMGenerator.js', ignoreList: [] },
@@ -143,4 +148,4 @@ function convert( path, ignoreList ) {
 
 	fs.writeFileSync( dstFolder + path, output, 'utf-8' );
 
-};
+}

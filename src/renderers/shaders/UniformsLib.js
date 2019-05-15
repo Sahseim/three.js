@@ -122,6 +122,8 @@ var UniformsLib = {
 
 		ambientLightColor: { value: [] },
 
+		lightProbe: { value: [] },
+
 		directionalLights: { value: [], properties: {
 			direction: {},
 			color: {},
