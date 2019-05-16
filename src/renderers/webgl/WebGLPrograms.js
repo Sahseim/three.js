@@ -28,7 +28,8 @@ function WebGLPrograms( renderer, extensions, capabilities, textures ) {
 	};
 
 	var parameterNames = [
-		"precision", "supportsVertexTextures", "map", "mapEncoding", "matcap", "matcapEncoding", "envMap", "envMapMode", "envMapEncoding",
+		"precision", "supportsVertexTextures", "map", "map2", "mapEncoding", "matcap", "matcapEncoding", "envMap", "envMapMode", "envMapEncoding",
+		"textureSwitchMap",
 		"mulMap", "mul",
 		"mulNormalMap",
 		"precision", "supportsVertexTextures", "map", "mapEncoding", "matcap", "matcapEncoding", "envMap", "envMapMode", "envMapEncoding",
@@ -142,6 +143,7 @@ function WebGLPrograms( renderer, extensions, capabilities, textures ) {
 			supportsVertexTextures: capabilities.vertexTextures,
 			outputEncoding: getTextureEncodingFromMap( ( ! currentRenderTarget ) ? null : currentRenderTarget.texture, renderer.gammaOutput ),
 			map: !! material.map,
+			map2: !! material.map2,
 			mapEncoding: getTextureEncodingFromMap( material.map, renderer.gammaInput ),
 			matcap: !! material.matcap,
 			matcapEncoding: getTextureEncodingFromMap( material.matcap, renderer.gammaInput ),
@@ -150,6 +152,7 @@ function WebGLPrograms( renderer, extensions, capabilities, textures ) {
 			envMapEncoding: getTextureEncodingFromMap( material.envMap, renderer.gammaInput ),
 			envMapCubeUV: ( !! material.envMap ) && ( ( material.envMap.mapping === CubeUVReflectionMapping ) || ( material.envMap.mapping === CubeUVRefractionMapping ) ),
 			lightMap: !! material.lightMap,
+			textureSwitchMap: !! material.textureSwitchMap,
 			mulMap: !! material.mulMap,
 			mulNormalMap: !! material.mulNormalMap,
 			mul: !! material.mul,

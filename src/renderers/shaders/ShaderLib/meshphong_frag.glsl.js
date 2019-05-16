@@ -44,7 +44,6 @@ void main() {
 
 	#include <logdepthbuf_fragment>
 	#include <map_fragment>
-	#include <texture_switch_fragment>
 	#include <mul_fragment>
 	#include <color_fragment>
 	#include <alphamap_fragment>

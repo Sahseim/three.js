@@ -57,10 +57,15 @@ var UniformsLib = {
 
 	},
 
+	map2: {
+
+		map2: { value: null }
+
+	},
+
 	textureswitchmap: {
 
-		textureSwitchMap: { value: null },
-		textureSwitchScale: { value: 1 }
+		textureSwitchMap: { value: null }
 
 	},
 

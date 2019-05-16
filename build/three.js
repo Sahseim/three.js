@@ -6004,7 +6004,7 @@
 
 	} );
 
-	var alphamap_fragment = "#ifdef USE_ALPHAMAP\n\tdiffuseColor.a *= texture2D( alphaMap, vUv ).g;\n#endif";
+	var alphamap_fragment = "#ifdef USE_ALPHAMAP\n\tdiffuseColor.a *= texture2D( alphaMap, vUv ).g;\n#endif\n#ifdef USE_TEXTURE_SWITCH\n\tdiffuseColor.a = texture2D( textureSwitchMap, vUv2 ).r;\n#endif";
 
 	var alphamap_pars_fragment = "#ifdef USE_ALPHAMAP\n\tuniform sampler2D alphaMap;\n#endif";
 
@@ -6106,9 +6106,11 @@
 
 	var logdepthbuf_vertex = "#ifdef USE_LOGDEPTHBUF\n\t#ifdef USE_LOGDEPTHBUF_EXT\n\t\tvFragDepth = 1.0 + gl_Position.w;\n\t#else\n\t\tgl_Position.z = log2( max( EPSILON, gl_Position.w + 1.0 ) ) * logDepthBufFC - 1.0;\n\t\tgl_Position.z *= gl_Position.w;\n\t#endif\n#endif";
 
-	var map_fragment = "#ifdef USE_MAP\n\tvec4 texelColor = texture2D( map, vUv );\n\ttexelColor = mapTexelToLinear( texelColor );\n\tdiffuseColor *= texelColor;\n#endif";
+	var map_fragment = "#ifdef USE_MAP\n\tvec4 texelColor = texture2D( map, vUv );\n\ttexelColor = mapTexelToLinear( texelColor );\n\t\n\t#if defined(USE_MAP2) && defined(USE_TEXTURE_SWITCH)\n\t\tvec4 texelColor2 = texture2D( map2, vUv * 3.0 );\n\t\ttexelColor2 = mapTexelToLinear( texelColor2 );\n\t\tdiffuseColor *= vec4(mix(texelColor.rgb, texelColor2.rgb, texture2D( textureSwitchMap, vUv2 ).b ), 1.0);\n\t#else\n\t\tdiffuseColor *= texelColor;\n\t#endif\n#endif";
 
-	var map_pars_fragment = "#ifdef USE_MAP\n\tuniform sampler2D map;\n#endif";
+	var map_pars_fragment = "#ifdef USE_MAP\n\tuniform sampler2D map;\n#endif\n#ifdef USE_MAP2\n\tuniform sampler2D map2;\n#endif";
+
+	var texture_switch_pars_fragment = "#ifdef USE_TEXTURE_SWITCH\n\tuniform sampler2D textureSwitchMap;\n#endif";
 
 	var mul_fragment = "#ifdef USE_MUL\n\tvec4 texelColorMul = texture2D( mulMap, vUv / mul );\n\ttexelColorMul = mapTexelToLinear( texelColorMul );\n\tdiffuseColor *= texelColorMul;\n#endif";
 
@@ -6182,11 +6184,11 @@
 
 	var uv_vertex = "#if defined( USE_MAP ) || defined( USE_MUL ) || defined( USE_BUMPMAP ) || defined( USE_NORMALMAP ) || defined( USE_SPECULARMAP ) || defined( USE_ALPHAMAP ) || defined( USE_EMISSIVEMAP ) || defined( USE_ROUGHNESSMAP ) || defined( USE_METALNESSMAP )\n\tvUv = ( uvTransform * vec3( uv, 1 ) ).xy;\n#endif";
 
-	var uv2_pars_fragment = "#if defined( USE_LIGHTMAP ) || defined( USE_AOMAP )\n\tvarying vec2 vUv2;\n#endif";
+	var uv2_pars_fragment = "#if defined( USE_LIGHTMAP ) || defined( USE_AOMAP ) || defined( USE_TEXTURE_SWITCH )  \n\tvarying vec2 vUv2;\n#endif";
 
-	var uv2_pars_vertex = "#if defined( USE_LIGHTMAP ) || defined( USE_AOMAP )\n\tattribute vec2 uv2;\n\tvarying vec2 vUv2;\n#endif";
+	var uv2_pars_vertex = "#if defined( USE_LIGHTMAP ) || defined( USE_AOMAP ) || defined( USE_TEXTURE_SWITCH )  \n\tattribute vec2 uv2;\n\tvarying vec2 vUv2;\n#endif";
 
-	var uv2_vertex = "#if defined( USE_LIGHTMAP ) || defined( USE_AOMAP )\n\tvUv2 = uv2;\n#endif";
+	var uv2_vertex = "#if defined( USE_LIGHTMAP ) || defined( USE_AOMAP ) || defined( USE_TEXTURE_SWITCH )  \n\tvUv2 = uv2;\n#endif";
 
 	var worldpos_vertex = "#if defined( USE_ENVMAP ) || defined( DISTANCE ) || defined ( USE_SHADOWMAP )\n\tvec4 worldPosition = modelMatrix * vec4( transformed, 1.0 );\n#endif";
 
@@ -6226,7 +6228,7 @@
 
 	var meshmatcap_vert = "#define MATCAP\nvarying vec3 vViewPosition;\n#ifndef FLAT_SHADED\n\tvarying vec3 vNormal;\n#endif\n#include <common>\n#include <uv_pars_vertex>\n#include <displacementmap_pars_vertex>\n#include <fog_pars_vertex>\n#include <morphtarget_pars_vertex>\n#include <skinning_pars_vertex>\n#include <logdepthbuf_pars_vertex>\n#include <clipping_planes_pars_vertex>\nvoid main() {\n\t#include <uv_vertex>\n\t#include <beginnormal_vertex>\n\t#include <morphnormal_vertex>\n\t#include <skinbase_vertex>\n\t#include <skinnormal_vertex>\n\t#include <defaultnormal_vertex>\n\t#ifndef FLAT_SHADED\n\t\tvNormal = normalize( transformedNormal );\n\t#endif\n\t#include <begin_vertex>\n\t#include <morphtarget_vertex>\n\t#include <skinning_vertex>\n\t#include <displacementmap_vertex>\n\t#include <project_vertex>\n\t#include <logdepthbuf_vertex>\n\t#include <clipping_planes_vertex>\n\t#include <fog_vertex>\n\tvViewPosition = - mvPosition.xyz;\n}";
 
-	var meshphong_frag = "#define PHONG\nuniform vec3 diffuse;\nuniform vec3 emissive;\nuniform vec3 specular;\nuniform float shininess;\nuniform float opacity;\n#include <common>\n#include <packing>\n#include <dithering_pars_fragment>\n#include <color_pars_fragment>\n#include <uv_pars_fragment>\n#include <uv2_pars_fragment>\n#include <map_pars_fragment>\n#include <mul_pars_fragment>\n#include <alphamap_pars_fragment>\n#include <aomap_pars_fragment>\n#include <lightmap_pars_fragment>\n#include <emissivemap_pars_fragment>\n#include <envmap_pars_fragment>\n#include <gradientmap_pars_fragment>\n#include <fog_pars_fragment>\n#include <bsdfs>\n#include <lights_pars_begin>\n#include <lights_phong_pars_fragment>\n#include <shadowmap_pars_fragment>\n#include <bumpmap_pars_fragment>\n#include <normalmap_pars_fragment>\n#include <mul_normal_pars_fragment>\n#include <specularmap_pars_fragment>\n#include <logdepthbuf_pars_fragment>\n#include <clipping_planes_pars_fragment>\nvoid main() {\n\t#include <clipping_planes_fragment>\n\tvec4 diffuseColor = vec4( diffuse, opacity );\n\tReflectedLight reflectedLight = ReflectedLight( vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ) );\n\tvec3 totalEmissiveRadiance = emissive;\n\t#include <logdepthbuf_fragment>\n\t#include <map_fragment>\n\t#include <mul_fragment>\n\t#include <color_fragment>\n\t#include <alphamap_fragment>\n\t#include <alphatest_fragment>\n\t#include <specularmap_fragment>\n\t#include <normal_fragment_begin>\n\t#include <normal_fragment_maps>\n\t#include <mul_normal_fragment>\n\t#include <emissivemap_fragment>\n\t#include <lights_phong_fragment>\n\t#include <lights_fragment_begin>\n\t#include <lights_fragment_maps>\n\t#include <lights_fragment_end>\n\t#include <aomap_fragment>\n\tvec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse + reflectedLight.directSpecular + reflectedLight.indirectSpecular + totalEmissiveRadiance;\n\t#include <envmap_fragment>\n\tgl_FragColor = vec4( outgoingLight, diffuseColor.a );\n\t#include <tonemapping_fragment>\n\t#include <encodings_fragment>\n\t#include <fog_fragment>\n\t#include <premultiplied_alpha_fragment>\n\t#include <dithering_fragment>\n}";
+	var meshphong_frag = "#define PHONG\nuniform vec3 diffuse;\nuniform vec3 emissive;\nuniform vec3 specular;\nuniform float shininess;\nuniform float opacity;\n#include <common>\n#include <packing>\n#include <dithering_pars_fragment>\n#include <color_pars_fragment>\n#include <uv_pars_fragment>\n#include <uv2_pars_fragment>\n#include <map_pars_fragment>\n#include <texture_switch_pars_fragment>\n#include <mul_pars_fragment>\n#include <alphamap_pars_fragment>\n#include <aomap_pars_fragment>\n#include <lightmap_pars_fragment>\n#include <emissivemap_pars_fragment>\n#include <envmap_pars_fragment>\n#include <gradientmap_pars_fragment>\n#include <fog_pars_fragment>\n#include <bsdfs>\n#include <lights_pars_begin>\n#include <lights_phong_pars_fragment>\n#include <shadowmap_pars_fragment>\n#include <bumpmap_pars_fragment>\n#include <normalmap_pars_fragment>\n#include <mul_normal_pars_fragment>\n#include <specularmap_pars_fragment>\n#include <logdepthbuf_pars_fragment>\n#include <clipping_planes_pars_fragment>\nvoid main() {\n\t#include <clipping_planes_fragment>\n\tvec4 diffuseColor = vec4( diffuse, opacity );\n\tReflectedLight reflectedLight = ReflectedLight( vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ) );\n\tvec3 totalEmissiveRadiance = emissive;\n\t#include <logdepthbuf_fragment>\n\t#include <map_fragment>\n\t#include <mul_fragment>\n\t#include <color_fragment>\n\t#include <alphamap_fragment>\n\t#include <alphatest_fragment>\n\t#include <specularmap_fragment>\n\t#include <normal_fragment_begin>\n\t#include <normal_fragment_maps>\n\t#include <mul_normal_fragment>\n\t#include <emissivemap_fragment>\n\t#include <lights_phong_fragment>\n\t#include <lights_fragment_begin>\n\t#include <lights_fragment_maps>\n\t#include <lights_fragment_end>\n\t#include <aomap_fragment>\n\tvec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse + reflectedLight.directSpecular + reflectedLight.indirectSpecular + totalEmissiveRadiance;\n\t#include <envmap_fragment>\n\tgl_FragColor = vec4( outgoingLight, diffuseColor.a );\n\t#include <tonemapping_fragment>\n\t#include <encodings_fragment>\n\t#include <fog_fragment>\n\t#include <premultiplied_alpha_fragment>\n\t#include <dithering_fragment>\n}";
 
 	var meshphong_vert = "#define PHONG\nvarying vec3 vViewPosition;\n#ifndef FLAT_SHADED\n\tvarying vec3 vNormal;\n#endif\n#include <common>\n#include <uv_pars_vertex>\n#include <uv2_pars_vertex>\n#include <displacementmap_pars_vertex>\n#include <envmap_pars_vertex>\n#include <color_pars_vertex>\n#include <fog_pars_vertex>\n#include <morphtarget_pars_vertex>\n#include <skinning_pars_vertex>\n#include <shadowmap_pars_vertex>\n#include <logdepthbuf_pars_vertex>\n#include <clipping_planes_pars_vertex>\nvoid main() {\n\t#include <uv_vertex>\n\t#include <uv2_vertex>\n\t#include <color_vertex>\n\t#include <beginnormal_vertex>\n\t#include <morphnormal_vertex>\n\t#include <skinbase_vertex>\n\t#include <skinnormal_vertex>\n\t#include <defaultnormal_vertex>\n#ifndef FLAT_SHADED\n\tvNormal = normalize( transformedNormal );\n#endif\n\t#include <begin_vertex>\n\t#include <morphtarget_vertex>\n\t#include <skinning_vertex>\n\t#include <displacementmap_vertex>\n\t#include <project_vertex>\n\t#include <logdepthbuf_vertex>\n\t#include <clipping_planes_vertex>\n\tvViewPosition = - mvPosition.xyz;\n\t#include <worldpos_vertex>\n\t#include <envmap_vertex>\n\t#include <shadowmap_vertex>\n\t#include <fog_vertex>\n}";
 
@@ -6304,6 +6306,7 @@
 		logdepthbuf_vertex: logdepthbuf_vertex,
 		map_fragment: map_fragment,
 		map_pars_fragment: map_pars_fragment,
+		texture_switch_pars_fragment: texture_switch_pars_fragment,
 		mul_fragment: mul_fragment,
 		mul_normal_fragment: mul_normal_fragment,
 		mul_pars_fragment: mul_pars_fragment,
@@ -7099,6 +7102,18 @@
 
 		},
 
+		map2: {
+
+			map2: { value: null }
+
+		},
+
+		textureswitchmap: {
+
+			textureSwitchMap: { value: null }
+
+		},
+
 		mulnormalmap: {
 
 			mulNormalMap: { value: null }
@@ -7306,6 +7321,8 @@
 				UniformsLib.specularmap,
 				UniformsLib.envmap,
 				UniformsLib.aomap,
+				UniformsLib.textureswitchmap,
+				UniformsLib.map2,
 				UniformsLib.mulmap,
 				UniformsLib.mulnormalmap,
 				UniformsLib.lightmap,
@@ -17258,6 +17275,8 @@
 				( parameters.useFog && parameters.fogExp ) ? '#define FOG_EXP2' : '',
 
 				parameters.map ? '#define USE_MAP' : '',
+				parameters.map2 ? '#define USE_MAP2' : '',
+				parameters.textureSwitchMap ? '#define USE_TEXTURE_SWITCH' : '',
 				parameters.mulMap ? '#define USE_MUL' : '',
 				parameters.mulNormalMap ? '#define USE_MUL_NORMAL' : '',
 				parameters.envMap ? '#define USE_ENVMAP' : '',
@@ -17373,6 +17392,8 @@
 				( parameters.useFog && parameters.fogExp ) ? '#define FOG_EXP2' : '',
 
 				parameters.map ? '#define USE_MAP' : '',
+				parameters.map2 ? '#define USE_MAP2' : '',
+				parameters.textureSwitchMap ? '#define USE_TEXTURE_SWITCH' : '',
 				parameters.mulMap ? '#define USE_MUL' : '',
 				parameters.mulNormalMap ? '#define USE_MUL_NORMAL' : '',
 				parameters.matcap ? '#define USE_MATCAP' : '',
@@ -17690,7 +17711,8 @@
 		};
 
 		var parameterNames = [
-			"precision", "supportsVertexTextures", "map", "mapEncoding", "matcap", "matcapEncoding", "envMap", "envMapMode", "envMapEncoding",
+			"precision", "supportsVertexTextures", "map", "map2", "mapEncoding", "matcap", "matcapEncoding", "envMap", "envMapMode", "envMapEncoding",
+			"textureSwitchMap",
 			"mulMap", "mul",
 			"mulNormalMap",
 			"precision", "supportsVertexTextures", "map", "mapEncoding", "matcap", "matcapEncoding", "envMap", "envMapMode", "envMapEncoding",
@@ -17804,6 +17826,7 @@
 				supportsVertexTextures: capabilities.vertexTextures,
 				outputEncoding: getTextureEncodingFromMap( ( ! currentRenderTarget ) ? null : currentRenderTarget.texture, renderer.gammaOutput ),
 				map: !! material.map,
+				map2: !! material.map2,
 				mapEncoding: getTextureEncodingFromMap( material.map, renderer.gammaInput ),
 				matcap: !! material.matcap,
 				matcapEncoding: getTextureEncodingFromMap( material.matcap, renderer.gammaInput ),
@@ -17812,6 +17835,7 @@
 				envMapEncoding: getTextureEncodingFromMap( material.envMap, renderer.gammaInput ),
 				envMapCubeUV: ( !! material.envMap ) && ( ( material.envMap.mapping === CubeUVReflectionMapping ) || ( material.envMap.mapping === CubeUVRefractionMapping ) ),
 				lightMap: !! material.lightMap,
+				textureSwitchMap: !! material.textureSwitchMap,
 				mulMap: !! material.mulMap,
 				mulNormalMap: !! material.mulNormalMap,
 				mul: !! material.mul,
@@ -24653,6 +24677,12 @@
 
 			}
 
+			if ( material.map2 ) {
+
+				uniforms.map2.value = material.map2;
+
+			}
+
 			if ( material.alphaMap ) {
 
 				uniforms.alphaMap.value = material.alphaMap;
@@ -24686,6 +24716,12 @@
 
 				uniforms.lightMap.value = material.lightMap;
 				uniforms.lightMapIntensity.value = material.lightMapIntensity;
+
+			}
+
+			if ( material.textureSwitchMap ) {
+
+				uniforms.textureSwitchMap.value = material.textureSwitchMap;
 
 			}
 
@@ -31967,12 +32003,15 @@
 		this.shininess = 30;
 
 		this.map = null;
+		this.map2 = null;
 
 		this.lightMap = null;
 		this.lightMapIntensity = 1.0;
 
 		this.mulMap = null;
 		this.mul= 1.0;
+
+		this.textureSwitchMap = null;
 
 		this.mulNormalMap = null;
 
@@ -32030,9 +32069,13 @@
 		this.shininess = source.shininess;
 
 		this.map = source.map;
+		this.map2 = source.map2;
 
 		this.lightMap = source.lightMap;
 		this.lightMapIntensity = source.lightMapIntensity;
+
+		this.textureSwitchMap = source.textureSwitchMap;
+		this.textureSwitchScale = source.textureSwitchScale;
 
 		this.mulMap = source.mulMap;
 		this.mul = source.mul;

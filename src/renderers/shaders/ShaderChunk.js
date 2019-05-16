@@ -51,7 +51,6 @@ import logdepthbuf_pars_vertex from './ShaderChunk/logdepthbuf_pars_vertex.glsl.
 import logdepthbuf_vertex from './ShaderChunk/logdepthbuf_vertex.glsl.js';
 import map_fragment from './ShaderChunk/map_fragment.glsl.js';
 import map_pars_fragment from './ShaderChunk/map_pars_fragment.glsl.js';
-import texture_switch_fragment from './ShaderChunk/texture_switch_fragment.glsl.js';
 import texture_switch_pars_fragment from './ShaderChunk/texture_switch_pars_fragment.glsl.js';
 import mul_fragment from './ShaderChunk/mul_fragment.glsl.js';
 import mul_normal_fragment from './ShaderChunk/mul_normal_fragment.glsl.js';
@@ -178,7 +177,6 @@ export var ShaderChunk = {
 	logdepthbuf_vertex: logdepthbuf_vertex,
 	map_fragment: map_fragment,
 	map_pars_fragment: map_pars_fragment,
-	texture_switch_fragment: texture_switch_fragment,
 	texture_switch_pars_fragment: texture_switch_pars_fragment,
 	mul_fragment: mul_fragment,
 	mul_normal_fragment: mul_normal_fragment,

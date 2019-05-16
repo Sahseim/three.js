@@ -58,6 +58,7 @@ var ShaderLib = {
 			UniformsLib.envmap,
 			UniformsLib.aomap,
 			UniformsLib.textureswitchmap,
+			UniformsLib.map2,
 			UniformsLib.mulmap,
 			UniformsLib.mulnormalmap,
 			UniformsLib.lightmap,

@@ -1989,6 +1989,12 @@ function WebGLRenderer( parameters ) {
 
 		}
 
+		if ( material.map2 ) {
+
+			uniforms.map2.value = material.map2;
+
+		}
+
 		if ( material.alphaMap ) {
 
 			uniforms.alphaMap.value = material.alphaMap;
@@ -2022,6 +2028,12 @@ function WebGLRenderer( parameters ) {
 
 			uniforms.lightMap.value = material.lightMap;
 			uniforms.lightMapIntensity.value = material.lightMapIntensity;
+
+		}
+
+		if ( material.textureSwitchMap ) {
+
+			uniforms.textureSwitchMap.value = material.textureSwitchMap;
 
 		}
 

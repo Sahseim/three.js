@@ -65,12 +65,15 @@ function MeshPhongMaterial( parameters ) {
 	this.shininess = 30;
 
 	this.map = null;
+	this.map2 = null;
 
 	this.lightMap = null;
 	this.lightMapIntensity = 1.0;
 
 	this.mulMap = null;
 	this.mul= 1.0;
+
+	this.textureSwitchMap = null;
 
 	this.mulNormalMap = null;
 
@@ -128,9 +131,13 @@ MeshPhongMaterial.prototype.copy = function ( source ) {
 	this.shininess = source.shininess;
 
 	this.map = source.map;
+	this.map2 = source.map2;
 
 	this.lightMap = source.lightMap;
 	this.lightMapIntensity = source.lightMapIntensity;
+
+	this.textureSwitchMap = source.textureSwitchMap;
+	this.textureSwitchScale = source.textureSwitchScale;
 
 	this.mulMap = source.mulMap;
 	this.mul = source.mul;
